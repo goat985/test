@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTX | ASL CLOUD SYSTEM</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Goldman:wght@700&family=Oxanium:wght@300;400;600;700;800&display=swap');
+
+        :root {
+            --primary: #00d4ff;
+            --accent: #ffcc00;
+            --accent2: #ff4ecd;
+            --bg: #05070a;
+            --bg2: #080b10;
+            --card-bg: #0d1018;
+            --card-border: #1a1f2e;
+            --text-dim: #4a5568;
+            --text-mid: #8892a4;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Oxanium', sans-serif;
+            background: var(--bg);
+            color: #fff;
+            padding-bottom: 100px;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Animated background grid */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-image:
+                linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── LOGIN ─── */
+        #loginOverlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(ellipse at center, #0a0e1a 0%, #000 100%);
+            z-index: 2000;
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .login-box {
+            background: #090d14;
+            padding: 35px 30px;
+            border-radius: 24px;
+            border: 1px solid var(--primary);
+            text-align: center;
+            width: 88%;
+            max-width: 380px;
+            box-shadow: 0 0 60px rgba(0,212,255,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-box::before {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: conic-gradient(transparent, rgba(0,212,255,0.05), transparent 30%);
+            animation: spin 6s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .login-logo { font-family: 'Goldman'; color: var(--primary); font-size: 1.8rem; margin-bottom: 6px; position: relative; }
+        .login-sub { color: var(--text-mid); font-size: 0.75rem; margin-bottom: 25px; letter-spacing: 3px; position: relative; }
+
+        /* ─── HEADER ─── */
+        header {
+            text-align: center;
+            padding: 28px 10px 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        #siteLogoImg {
+            width: 75px; height: 75px;
+            border-radius: 50%;
+            border: 2px solid var(--primary);
+            object-fit: cover;
+            margin-bottom: 10px;
+            box-shadow: 0 0 20px rgba(0,212,255,0.3);
+        }
+
+        header h1 {
+            font-family: 'Goldman';
+            color: var(--primary);
+            font-size: 1.4rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        /* ─── LAYOUT ─── */
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 0 14px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page { display: none; animation: fadeIn 0.35s ease; }
+        .page.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ─── PAGE TITLE ─── */
+        .page-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+            padding: 0 4px;
+        }
+
+        .page-title h3 {
+            font-family: 'Goldman';
+            font-size: 1rem;
+            color: var(--primary);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .page-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(to right, var(--primary), transparent);
+        }
+
+        /* ─── CARDS ─── */
+        .card {
+            background: var(--card-bg);
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid var(--card-border);
+            margin-bottom: 12px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 1px;
+            background: linear-gradient(to right, transparent, rgba(0,212,255,0.3), transparent);
+        }
+
+        /* ─── MATCH CARD ─── */
+        .match-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+        }
+
+        .team-box {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .team-logo {
+            width: 52px; height: 52px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 6px rgba(0,212,255,0.2));
+        }
+
+        .team-name { font-size: 0.8rem; font-weight: 700; color: #dde; line-height: 1.2; }
+
+        .score-box {
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--primary);
+            min-width: 75px;
+            font-family: 'Goldman';
+            text-shadow: 0 0 15px rgba(0,212,255,0.5);
+        }
+
+        .badge {
+            background: rgba(255,204,0,0.1);
+            color: var(--accent);
+            padding: 7px 14px;
+            border-radius: 10px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            border: 1px solid rgba(255,204,0,0.25);
+        }
+
+        /* ─── MVP TAG ─── */
+        .mvp-tag {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid rgba(255,204,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mvp-player-img {
+            width: 34px; height: 34px;
+            border-radius: 50%;
+            border: 1.5px solid var(--accent);
+            object-fit: cover;
+        }
+
+        .mvp-info { color: var(--accent); font-size: 0.78rem; font-weight: 700; }
+
+        /* ─── DEL BUTTON ─── */
+        .del-btn {
+            position: absolute;
+            top: 10px; right: 10px;
+            border: none; border-radius: 50%;
+            width: 28px; height: 28px;
+            cursor: pointer;
+            background: rgba(255,68,68,0.2);
+            color: #ff4444;
+            border: 1px solid rgba(255,68,68,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* ─── FORMS ─── */
+        .input-field {
+            width: 100%;
+            background: #0d1218;
+            border: 1.5px solid #1e2535;
+            border-radius: 12px;
+            padding: 13px 16px;
+            color: white;
+            margin-bottom: 12px;
+            outline: none;
+            font-family: 'Oxanium', sans-serif;
+            font-size: 0.85rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus { border-color: var(--primary); }
+
+        .btn-main {
+            width: 100%;
+            background: linear-gradient(135deg, var(--primary), #0099cc);
+            color: #000;
+            font-weight: 800;
+            padding: 14px;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-family: 'Oxanium', sans-serif;
+            letter-spacing: 1px;
+            font-size: 0.9rem;
+            transition: opacity 0.2s, transform 0.1s;
+        }
+
+        .btn-main:active { transform: scale(0.98); opacity: 0.9; }
+
+        .upload-label {
+            display: block;
+            border: 1.5px dashed #2a3040;
+            padding: 11px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            font-size: 0.78rem;
+            color: #666;
+            text-align: center;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .upload-label:hover { border-color: var(--primary); color: var(--primary); }
+
+        /* ─── MVP PAGE ─── */
+        .mvp-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 18px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .mvp-rank-badge {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 800;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .rank-1 { background: rgba(255,215,0,0.15); color: var(--gold); border: 1.5px solid var(--gold); }
+        .rank-2 { background: rgba(192,192,192,0.15); color: var(--silver); border: 1.5px solid var(--silver); }
+        .rank-3 { background: rgba(205,127,50,0.15); color: var(--bronze); border: 1.5px solid var(--bronze); }
+        .rank-other { background: rgba(255,255,255,0.05); color: #666; border: 1.5px solid #333; }
+
+        .mvp-img-lg {
+            width: 52px; height: 52px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid rgba(255,204,0,0.4);
+            flex-shrink: 0;
+        }
+
+        .mvp-details { flex: 1; }
+        .mvp-details .name { font-weight: 700; font-size: 0.95rem; }
+        .mvp-details .team-tag { font-size: 0.72rem; color: var(--text-mid); margin-top: 2px; }
+
+        .mvp-count {
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .mvp-count .num {
+            font-family: 'Goldman';
+            font-size: 1.4rem;
+            color: var(--accent);
+        }
+
+        .mvp-count .lbl { font-size: 0.62rem; color: var(--text-mid); }
+
+        /* ─── MOTM ─── */
+        .motm-section {
+            background: linear-gradient(135deg, rgba(255,204,0,0.08), rgba(0,212,255,0.05));
+            border: 1px solid rgba(255,204,0,0.2);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .motm-crown { font-size: 2rem; margin-bottom: 6px; }
+        .motm-title { font-size: 0.65rem; letter-spacing: 3px; color: var(--accent); margin-bottom: 14px; text-transform: uppercase; }
+
+        .motm-img {
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--accent);
+            margin: 0 auto 10px;
+            display: block;
+            box-shadow: 0 0 25px rgba(255,204,0,0.3);
+        }
+
+        .motm-name { font-family: 'Goldman'; font-size: 1.1rem; color: #fff; }
+        .motm-team { font-size: 0.72rem; color: var(--text-mid); margin-top: 4px; }
+        .motm-match { font-size: 0.7rem; color: var(--primary); margin-top: 6px; }
+
+        /* ─── TEAMS LIST ─── */
+        .team-list-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            padding: 15px 18px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            transition: border-color 0.2s;
+        }
+
+        .team-list-logo {
+            width: 46px; height: 46px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .team-list-info { flex: 1; }
+        .team-list-name { font-weight: 700; font-size: 0.9rem; }
+        .team-list-stats { font-size: 0.7rem; color: var(--text-mid); margin-top: 3px; }
+
+        .team-stat-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+        .stat-pill {
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+
+        .pill-w { background: rgba(0,212,255,0.1); color: var(--primary); border: 1px solid rgba(0,212,255,0.2); }
+        .pill-d { background: rgba(255,204,0,0.1); color: var(--accent); border: 1px solid rgba(255,204,0,0.2); }
+        .pill-l { background: rgba(255,68,68,0.1); color: #ff6666; border: 1px solid rgba(255,68,68,0.2); }
+        .pill-pts { background: rgba(0,255,136,0.1); color: #00ff88; border: 1px solid rgba(0,255,136,0.2); }
+
+        /* ─── LEADERBOARD ─── */
+        .lb-tabs {
+            display: flex;
+            background: #0d1018;
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+            border: 1px solid var(--card-border);
+        }
+
+        .lb-tab {
+            flex: 1;
+            padding: 9px;
+            text-align: center;
+            border-radius: 9px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: var(--text-mid);
+            transition: all 0.2s;
+        }
+
+        .lb-tab.active {
+            background: var(--primary);
+            color: #000;
+        }
+
+        .lb-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 14px;
+            margin-bottom: 8px;
+            transition: border-color 0.2s;
+        }
+
+        .lb-rank {
+            font-family: 'Goldman';
+            font-size: 1rem;
+            min-width: 24px;
+            text-align: center;
+        }
+
+        .lb-rank.r1 { color: var(--gold); }
+        .lb-rank.r2 { color: var(--silver); }
+        .lb-rank.r3 { color: var(--bronze); }
+
+        .lb-avatar {
+            width: 40px; height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1.5px solid #2a3040;
+            flex-shrink: 0;
+        }
+
+        .lb-logo {
+            width: 40px; height: 40px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .lb-info { flex: 1; }
+        .lb-info .n { font-weight: 700; font-size: 0.88rem; }
+        .lb-info .s { font-size: 0.68rem; color: var(--text-mid); margin-top: 2px; }
+
+        .lb-score {
+            font-family: 'Goldman';
+            font-size: 1.3rem;
+            color: var(--primary);
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-mid);
+        }
+
+        .empty-state i { font-size: 2.5rem; margin-bottom: 12px; opacity: 0.3; display: block; }
+        .empty-state p { font-size: 0.8rem; }
+
+        /* ─── BOTTOM NAV ─── */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background: #080b10;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0 14px;
+            border-top: 1px solid rgba(0,212,255,0.15);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .nav-item {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.55rem;
+            cursor: pointer;
+            flex: 1;
+            transition: color 0.2s;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item.active { color: var(--primary); }
+        .nav-item i { font-size: 1.2rem; display: block; margin-bottom: 3px; }
+
+        /* ─── SECTION DIVIDER ─── */
+        .section-divider {
+            text-align: center;
+            color: var(--text-dim);
+            font-size: 0.65rem;
+            letter-spacing: 3px;
+            padding: 8px 0 12px;
+            text-transform: uppercase;
+        }
+
+        /* ─── EDIT BTNS ─── */
+        .edit-del-row {
+            display: flex;
+            gap: 6px;
+            margin-top: 10px;
+        }
+
+        .edit-btn-sm {
+            flex: 1;
+            padding: 7px;
+            border-radius: 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+            font-family: 'Oxanium', sans-serif;
+        }
+
+        .btn-del-sm { background: rgba(255,68,68,0.15); color: #ff6666; border: 1px solid rgba(255,68,68,0.25); }
+    </style>
+</head>
+<body>
+
+<!-- ─── LOGIN ─── -->
+<div id="loginOverlay">
+    <div class="login-box">
+        <div class="login-logo">ASL CLOUD</div>
+        <div class="login-sub">SUPER LEAGUE SYSTEM</div>
+        <input type="email" id="userEmail" class="input-field" placeholder="Owner Email" style="position:relative;">
+        <input type="password" id="accessCode" class="input-field" placeholder="Password" style="position:relative;">
+        <button class="btn-main" onclick="verify()" style="position:relative;">LOGIN</button>
+        <button onclick="enter('guest')" style="background:none; border:none; color:var(--primary); margin-top:14px; cursor:pointer; font-family:'Oxanium'; font-size:0.85rem; display:block; width:100%;">
+            <i class="fas fa-eye"></i> Guest View
+        </button>
+    </div>
+</div>
+
+<!-- ─── MAIN APP ─── -->
+<div id="mainApp" style="display:none;">
+    <header>
+        <img id="siteLogoImg" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%2300d4ff22' stroke='%2300d4ff' stroke-width='2'/%3E%3Ctext x='50' y='58' text-anchor='middle' fill='%2300d4ff' font-size='28' font-family='sans-serif' font-weight='bold'%3EASL%3C/text%3E%3C/svg%3E" alt="Logo">
+        <h1 id="siteNameDisplay">ASL SUPER LEAGUE</h1>
+    </header>
+
+    <div class="container">
+
+        <!-- RESULTS -->
+        <div id="resPage" class="page active">
+            <div class="page-title"><h3><i class="fas fa-poll" style="margin-right:8px;"></i>Results</h3></div>
+            <div id="resDisplay"><div class="empty-state"><i class="fas fa-futbol"></i><p>No results yet</p></div></div>
+        </div>
+
+        <!-- FIXTURES -->
+        <div id="fixPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-calendar-alt" style="margin-right:8px;"></i>Fixtures</h3></div>
+            <div id="fixDisplay"><div class="empty-state"><i class="fas fa-calendar"></i><p>No fixtures yet</p></div></div>
+        </div>
+
+        <!-- MVPs PAGE -->
+        <div id="mvpPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-crown" style="margin-right:8px;"></i>MVP Awards</h3></div>
+
+            <!-- MOTM Section -->
+            <div id="motmSection"></div>
+
+            <!-- MVP Leaderboard -->
+            <div class="section-divider">── TOP MVP ──</div>
+            <div id="mvpLeaderboard"></div>
+        </div>
+
+        <!-- TEAMS LIST -->
+        <div id="teamsPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-shield-alt" style="margin-right:8px;"></i>Teams</h3></div>
+            <div id="teamsDisplay"><div class="empty-state"><i class="fas fa-shield-alt"></i><p>No teams registered</p></div></div>
+        </div>
+
+        <!-- LEADERBOARD -->
+        <div id="lbPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-trophy" style="margin-right:8px;"></i>Leaderboard</h3></div>
+            <div class="lb-tabs">
+                <div class="lb-tab active" onclick="switchLbTab('players', this)"><i class="fas fa-user"></i> Players</div>
+                <div class="lb-tab" onclick="switchLbTab('teams', this)"><i class="fas fa-shield-alt"></i> Teams</div>
+            </div>
+            <div id="lbPlayersDisplay"></div>
+            <div id="lbTeamsDisplay" style="display:none;"></div>
+        </div>
+
+        <!-- ADMIN -->
+        <div id="adminPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-edit" style="margin-right:8px;"></i>Admin Panel</h3></div>
+
+            <!-- Post Match -->
+            <div class="card">
+                <h4 style="color:var(--primary); margin-bottom:14px; font-size:0.85rem; letter-spacing:1px;">PUBLISH MATCH</h4>
+                <select id="postType" class="input-field" onchange="toggleMvpInputs()">
+                    <option value="fixture">Fixture</option>
+                    <option value="result">Result (Score + MVP)</option>
+                </select>
+                <input type="text" id="t1" class="input-field" placeholder="Team 1 Name">
+                <label class="upload-label"><i class="fas fa-image"></i> Logo 1 <input type="file" hidden onchange="processImage(event, 'l1')"></label>
+                <input type="text" id="t2" class="input-field" placeholder="Team 2 Name">
+                <label class="upload-label"><i class="fas fa-image"></i> Logo 2 <input type="file" hidden onchange="processImage(event, 'l2')"></label>
+                <input type="text" id="valInput" class="input-field" placeholder="Score (e.g. 3 - 1) or Time">
+                <div id="mvpBox" style="display:none; border-top:1px solid #1a2030; padding-top:14px; margin-top:2px;">
+                    <p style="font-size:0.72rem; color:var(--accent); margin-bottom:10px; letter-spacing:1px;">MVP / MAN OF THE MATCH</p>
+                    <input type="text" id="mvpName" class="input-field" placeholder="Player Name">
+                    <input type="text" id="mvpTeam" class="input-field" placeholder="Player Team">
+                    <label class="upload-label"><i class="fas fa-user"></i> Player Photo <input type="file" hidden onchange="processImage(event, 'mvpPic')"></label>
+                </div>
+                <button class="btn-main" onclick="saveData()">PUBLISH TO CLOUD</button>
+            </div>
+
+            <!-- Add Team -->
+            <div class="card">
+                <h4 style="color:var(--primary); margin-bottom:14px; font-size:0.85rem; letter-spacing:1px;">REGISTER TEAM</h4>
+                <input type="text" id="newTeamName" class="input-field" placeholder="Team Name">
+                <label class="upload-label"><i class="fas fa-shield-alt"></i> Team Logo <input type="file" hidden onchange="processImage(event, 'newTeamLogo')"></label>
+                <button class="btn-main" onclick="addTeam()">ADD TEAM</button>
+            </div>
+
+            <!-- Add Player Stats -->
+            <div class="card">
+                <h4 style="color:var(--primary); margin-bottom:14px; font-size:0.85rem; letter-spacing:1px;">UPDATE PLAYER STATS</h4>
+                <input type="text" id="pName" class="input-field" placeholder="Player Name">
+                <input type="text" id="pTeam" class="input-field" placeholder="Player Team">
+                <input type="number" id="pGoals" class="input-field" placeholder="Goals (add number)">
+                <input type="number" id="pAssists" class="input-field" placeholder="Assists (add number)">
+                <label class="upload-label"><i class="fas fa-user"></i> Player Photo <input type="file" hidden onchange="processImage(event, 'pPhoto')"></label>
+                <button class="btn-main" onclick="updatePlayer()">UPDATE STATS</button>
+            </div>
+
+            <!-- Update Team Stats -->
+            <div class="card">
+                <h4 style="color:var(--primary); margin-bottom:14px; font-size:0.85rem; letter-spacing:1px;">UPDATE TEAM STATS</h4>
+                <input type="text" id="tStatName" class="input-field" placeholder="Team Name">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+                    <input type="number" id="tStatW" class="input-field" placeholder="Wins +" style="margin:0;">
+                    <input type="number" id="tStatD" class="input-field" placeholder="Draws +" style="margin:0;">
+                    <input type="number" id="tStatL" class="input-field" placeholder="Losses +" style="margin:0;">
+                    <input type="number" id="tStatGF" class="input-field" placeholder="Goals For +" style="margin:0;">
+                </div>
+                <div style="margin-bottom:12px;"></div>
+                <button class="btn-main" onclick="updateTeamStats()">UPDATE TEAM</button>
+            </div>
+        </div>
+
+        <!-- OWNER PANEL -->
+        <div id="ownerPage" class="page">
+            <div class="page-title"><h3><i class="fas fa-cog" style="margin-right:8px;"></i>Settings</h3></div>
+            <div class="card">
+                <button onclick="logout()" style="background:rgba(255,68,68,0.15); color:#ff6666; border:1px solid rgba(255,68,68,0.3); padding:11px; border-radius:10px; width:100%; margin-bottom:16px; cursor:pointer; font-family:'Oxanium'; font-weight:700;">
+                    <i class="fas fa-sign-out-alt"></i> LOGOUT
+                </button>
+                <input type="text" id="newSiteName" class="input-field" placeholder="League Name">
+                <label class="upload-label"><i class="fas fa-image"></i> League Logo <input type="file" hidden onchange="processImage(event, 'siteL')"></label>
+                <label style="font-size:0.75rem; color:#666; margin-bottom:6px; display:block;">Primary Color</label>
+                <input type="color" id="newColor" value="#00d4ff" style="width:100%; height:45px; margin-bottom:16px; background:#0d1218; border:1.5px solid #1e2535; border-radius:12px; cursor:pointer; padding:4px;">
+                <button class="btn-main" onclick="saveOwner()">SAVE IDENTITY</button>
+            </div>
+        </div>
+
+    </div><!-- end container -->
+
+    <!-- BOTTOM NAV -->
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="showP('resPage', this)"><i class="fas fa-poll"></i>Results</div>
+        <div class="nav-item" onclick="showP('fixPage', this)"><i class="fas fa-calendar-alt"></i>Fixtures</div>
+        <div class="nav-item" onclick="showP('mvpPage', this)"><i class="fas fa-crown"></i>MVPs</div>
+        <div class="nav-item" onclick="showP('teamsPage', this)"><i class="fas fa-shield-alt"></i>Teams</div>
+        <div class="nav-item" onclick="showP('lbPage', this)"><i class="fas fa-trophy"></i>Board</div>
+        <div id="admTab" class="nav-item" style="display:none;" onclick="showP('adminPage', this)"><i class="fas fa-edit"></i>Admin</div>
+        <div id="ownTab" class="nav-item" style="display:none;" onclick="showP('ownerPage', this)"><i class="fas fa-cog"></i>Settings</div>
+    </nav>
+</div>
+
+<script>
+    const DB_URL = "https://asl-super-league-default-rtdb.firebaseio.com/";
+
+    let tempImgs = { l1:'', l2:'', siteL:'', mvpPic:'', newTeamLogo:'', pPhoto:'' };
+    let currentRole = 'guest';
+    let currentLbTab = 'players';
+
+    window.onload = () => {
+        const saved = localStorage.getItem('asl_role');
+        if(saved) enter(saved);
+        loadAll();
+    };
+
+    // ─── AUTH ───
+    function verify() {
+        const email = document.getElementById('userEmail').value.trim().toLowerCase();
+        const code = document.getElementById('accessCode').value;
+        if(email === 'younss77a@gmail.com' && code === 'rtxbaba1') {
+            localStorage.setItem('asl_role', 'owner');
+            enter('owner');
+        } else { alert("Access Denied!"); }
+    }
+
+    function enter(role) {
+        currentRole = role;
+        document.getElementById('loginOverlay').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        if(role === 'owner') {
+            document.getElementById('admTab').style.display = 'block';
+            document.getElementById('ownTab').style.display = 'block';
+        }
+        loadAll();
+    }
+
+    function logout() {
+        localStorage.removeItem('asl_role');
+        location.reload();
+    }
+
+    // ─── UI HELPERS ───
+    function toggleMvpInputs() {
+        const type = document.getElementById('postType').value;
+        document.getElementById('mvpBox').style.display = (type === 'result') ? 'block' : 'none';
+    }
+
+    function showP(id, el) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+        if(el) {
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+        }
+    }
+
+    function switchLbTab(tab, el) {
+        currentLbTab = tab;
+        document.querySelectorAll('.lb-tab').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        document.getElementById('lbPlayersDisplay').style.display = (tab === 'players') ? 'block' : 'none';
+        document.getElementById('lbTeamsDisplay').style.display = (tab === 'teams') ? 'block' : 'none';
+    }
+
+    // ─── IMAGE PROCESSING ───
+    function processImage(e, key) {
+        const file = e.target.files[0];
+        if(!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            const img = new Image();
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 200; canvas.height = 200;
+                ctx.drawImage(img, 0, 0, 200, 200);
+                const d = ctx.getImageData(0,0,200,200);
+                for (let i = 0; i < d.data.length; i += 4) {
+                    if (d.data[i] < 45 && d.data[i+1] < 45 && d.data[i+2] < 45) d.data[i+3] = 0;
+                }
+                ctx.putImageData(d, 0, 0);
+                tempImgs[key] = canvas.toDataURL('image/png');
+                // Visual feedback
+                const label = e.target.closest('.upload-label') || e.target.closest('label');
+                if(label) { label.style.borderColor = '#00ff88'; label.style.color = '#00ff88'; label.innerHTML = '<i class="fas fa-check"></i> Image Ready'; }
+            };
+            img.src = ev.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ─── SAVE MATCH ───
+    async function saveData() {
+        const type = document.getElementById('postType').value;
+        const folder = (type === 'result') ? 'results' : 'fixtures';
+        const item = {
+            t1: document.getElementById('t1').value,
+            l1: tempImgs.l1,
+            t2: document.getElementById('t2').value,
+            l2: tempImgs.l2,
+            v: document.getElementById('valInput').value,
+            mvp: document.getElementById('mvpName').value || '',
+            mvpTeam: document.getElementById('mvpTeam').value || '',
+            mpic: tempImgs.mvpPic || '',
+            time: Date.now()
+        };
+        if(!item.t1 || !item.t2 || !item.v) { alert('Fill all required fields!'); return; }
+        await fetch(`${DB_URL}${folder}.json`, { method: 'POST', body: JSON.stringify(item) });
+        clearInputs();
+        loadAll();
+        showP(type === 'result' ? 'resPage' : 'fixPage');
+        alert('Published!');
+    }
+
+    // ─── ADD TEAM ───
+    async function addTeam() {
+        const name = document.getElementById('newTeamName').value.trim();
+        if(!name) { alert('Enter team name!'); return; }
+        const existing = await (await fetch(`${DB_URL}teams.json`)).json();
+        let teamExists = false;
+        if(existing) {
+            Object.values(existing).forEach(t => { if(t.name.toLowerCase() === name.toLowerCase()) teamExists = true; });
+        }
+        if(teamExists) { alert('Team already exists!'); return; }
+        const team = { name, logo: tempImgs.newTeamLogo, w:0, d:0, l:0, gf:0, ga:0, pts:0, time: Date.now() };
+        await fetch(`${DB_URL}teams.json`, { method: 'POST', body: JSON.stringify(team) });
+        document.getElementById('newTeamName').value = '';
+        tempImgs.newTeamLogo = '';
+        loadAll();
+        alert('Team added!');
+    }
+
+    // ─── UPDATE PLAYER STATS ───
+    async function updatePlayer() {
+        const name = document.getElementById('pName').value.trim();
+        const team = document.getElementById('pTeam').value.trim();
+        const goals = parseInt(document.getElementById('pGoals').value) || 0;
+        const assists = parseInt(document.getElementById('pAssists').value) || 0;
+        const photo = tempImgs.pPhoto;
+
+        if(!name) { alert('Enter player name!'); return; }
+
+        const data = await (await fetch(`${DB_URL}players.json`)).json();
+        let playerId = null;
+        let existing = null;
+
+        if(data) {
+            Object.entries(data).forEach(([id, p]) => {
+                if(p.name.toLowerCase() === name.toLowerCase()) { playerId = id; existing = p; }
+            });
+        }
+
+        const updated = {
+            name, team,
+            goals: (existing ? existing.goals : 0) + goals,
+            assists: (existing ? existing.assists : 0) + assists,
+            mvps: existing ? (existing.mvps || 0) : 0,
+            photo: photo || (existing ? existing.photo : ''),
+            time: Date.now()
+        };
+
+        if(playerId) {
+            await fetch(`${DB_URL}players/${playerId}.json`, { method: 'PUT', body: JSON.stringify(updated) });
+        } else {
+            await fetch(`${DB_URL}players.json`, { method: 'POST', body: JSON.stringify(updated) });
+        }
+
+        ['pName','pTeam','pGoals','pAssists'].forEach(id => document.getElementById(id).value = '');
+        tempImgs.pPhoto = '';
+        loadAll();
+        alert('Player updated!');
+    }
+
+    // ─── UPDATE TEAM STATS ───
+    async function updateTeamStats() {
+        const name = document.getElementById('tStatName').value.trim();
+        const w = parseInt(document.getElementById('tStatW').value) || 0;
+        const d = parseInt(document.getElementById('tStatD').value) || 0;
+        const l = parseInt(document.getElementById('tStatL').value) || 0;
+        const gf = parseInt(document.getElementById('tStatGF').value) || 0;
+
+        if(!name) { alert('Enter team name!'); return; }
+
+        const data = await (await fetch(`${DB_URL}teams.json`)).json();
+        if(!data) { alert('No teams found!'); return; }
+
+        let teamId = null;
+        let existing = null;
+        Object.entries(data).forEach(([id, t]) => {
+            if(t.name.toLowerCase() === name.toLowerCase()) { teamId = id; existing = t; }
+        });
+
+        if(!teamId) { alert('Team not found! Add it first.'); return; }
+
+        const updated = {
+            ...existing,
+            w: (existing.w||0) + w,
+            d: (existing.d||0) + d,
+            l: (existing.l||0) + l,
+            gf: (existing.gf||0) + gf,
+            pts: (existing.pts||0) + (w*3) + (d*1)
+        };
+
+        await fetch(`${DB_URL}teams/${teamId}.json`, { method: 'PUT', body: JSON.stringify(updated) });
+        ['tStatName','tStatW','tStatD','tStatL','tStatGF'].forEach(id => document.getElementById(id).value = '');
+        loadAll();
+        alert('Team stats updated!');
+    }
+
+    // ─── DELETE ───
+    async function del(folder, id) {
+        if(confirm('Delete this entry?')) {
+            await fetch(`${DB_URL}${folder}/${id}.json`, { method: 'DELETE' });
+            loadAll();
+        }
+    }
+
+    async function delTeam(id) {
+        if(confirm('Remove this team?')) {
+            await fetch(`${DB_URL}teams/${id}.json`, { method: 'DELETE' });
+            loadAll();
+        }
+    }
+
+    async function delPlayer(id) {
+        if(confirm('Remove this player?')) {
+            await fetch(`${DB_URL}players/${id}.json`, { method: 'DELETE' });
+            loadAll();
+        }
+    }
+
+    // ─── OWNER SETTINGS ───
+    async function saveOwner() {
+        const iden = {
+            name: document.getElementById('newSiteName').value,
+            color: document.getElementById('newColor').value,
+            logo: tempImgs.siteL
+        };
+        await fetch(`${DB_URL}identity.json`, { method: 'PUT', body: JSON.stringify(iden) });
+        loadAll();
+        alert("Identity Updated!");
+    }
+
+    // ─── LOAD ALL ───
+    async function loadAll() {
+        const isOwner = (currentRole === 'owner');
+
+        // Identity
+        try {
+            const iden = await (await fetch(`${DB_URL}identity.json`)).json();
+            if(iden) {
+                document.getElementById('siteNameDisplay').innerText = iden.name || "ASL";
+                if(iden.logo) document.getElementById('siteLogoImg').src = iden.logo;
+                document.documentElement.style.setProperty('--primary', iden.color || '#00d4ff');
+            }
+        } catch(e) {}
+
+        // ── RESULTS ──
+        try {
+            const resData = await (await fetch(`${DB_URL}results.json`)).json();
+            let resHtml = '';
+            let mvpMap = {}; // track mvp counts
+            let lastMotm = null;
+
+            if(resData) {
+                const entries = Object.entries(resData).sort((a,b) => b[1].time - a[1].time);
+                entries.forEach(([id, m]) => {
+                    resHtml += `
+                    <div class="card">
+                        ${isOwner ? `<button class="del-btn" onclick="del('results','${id}')"><i class="fas fa-trash"></i></button>` : ''}
+                        <div class="match-row">
+                            <div class="team-box">
+                                ${m.l1 ? `<img src="${m.l1}" class="team-logo">` : `<div style="width:52px;height:52px;background:#1a2030;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">${m.t1.substring(0,3)}</div>`}
+                                <span class="team-name">${m.t1}</span>
+                            </div>
+                            <div class="score-box">${m.v}</div>
+                            <div class="team-box">
+                                ${m.l2 ? `<img src="${m.l2}" class="team-logo">` : `<div style="width:52px;height:52px;background:#1a2030;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">${m.t2.substring(0,3)}</div>`}
+                                <span class="team-name">${m.t2}</span>
+                            </div>
+                        </div>
+                        ${m.mvp ? `<div class="mvp-tag">
+                            ${m.mpic ? `<img src="${m.mpic}" class="mvp-player-img">` : `<div style="width:34px;height:34px;border-radius:50%;background:#1a2030;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#444;font-size:0.7rem;"></i></div>`}
+                            <span class="mvp-info"><i class="fas fa-star"></i> MVP: ${m.mvp}</span>
+                        </div>` : ''}
+                    </div>`;
+
+                    // build MVP stats
+                    if(m.mvp) {
+                        const key = m.mvp.toLowerCase().trim();
+                        if(!mvpMap[key]) mvpMap[key] = { name: m.mvp, pic: m.mpic, team: m.mvpTeam || '', count: 0, match: m.v, teams: `${m.t1} vs ${m.t2}` };
+                        mvpMap[key].count++;
+                        if(!lastMotm) lastMotm = { name: m.mvp, pic: m.mpic, team: m.mvpTeam || m.t1, match: `${m.t1} ${m.v} ${m.t2}` };
+                    }
+                });
+            }
+
+            document.getElementById('resDisplay').innerHTML = resHtml || '<div class="empty-state"><i class="fas fa-futbol"></i><p>No results yet</p></div>';
+
+            // ── MVP PAGE ──
+            // MOTM
+            if(lastMotm) {
+                document.getElementById('motmSection').innerHTML = `
+                <div class="motm-section">
+                    <div class="motm-crown">⭐</div>
+                    <div class="motm-title">Man of the Match</div>
+                    ${lastMotm.pic ? `<img src="${lastMotm.pic}" class="motm-img">` : `<div class="motm-img" style="background:#1a2030;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="font-size:2rem;color:#333;"></i></div>`}
+                    <div class="motm-name">${lastMotm.name}</div>
+                    <div class="motm-team">${lastMotm.team}</div>
+                    <div class="motm-match"><i class="fas fa-futbol"></i> ${lastMotm.match}</div>
+                </div>`;
+            } else {
+                document.getElementById('motmSection').innerHTML = '';
+            }
+
+            // MVP Leaderboard
+            const mvpArr = Object.values(mvpMap).sort((a,b) => b.count - a.count);
+            let mvpLbHtml = '';
+            mvpArr.forEach((p, i) => {
+                const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : 'rank-other';
+                mvpLbHtml += `
+                <div class="mvp-card">
+                    <div class="mvp-rank-badge ${rankClass}">${i+1}</div>
+                    ${p.pic ? `<img src="${p.pic}" class="mvp-img-lg">` : `<div class="mvp-img-lg" style="background:#1a2030;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#444;"></i></div>`}
+                    <div class="mvp-details">
+                        <div class="name">${p.name}</div>
+                        <div class="team-tag">${p.team}</div>
+                    </div>
+                    <div class="mvp-count">
+                        <div class="num">${p.count}</div>
+                        <div class="lbl">MOTM</div>
+                    </div>
+                </div>`;
+            });
+            document.getElementById('mvpLeaderboard').innerHTML = mvpLbHtml || '<div class="empty-state"><i class="fas fa-crown"></i><p>No MVP data yet</p></div>';
+
+        } catch(e) {}
+
+        // ── FIXTURES ──
+        try {
+            const fixData = await (await fetch(`${DB_URL}fixtures.json`)).json();
+            let fixHtml = '';
+            if(fixData) {
+                Object.entries(fixData).sort((a,b) => b[1].time - a[1].time).forEach(([id, f]) => {
+                    fixHtml += `
+                    <div class="card">
+                        ${isOwner ? `<button class="del-btn" onclick="del('fixtures','${id}')"><i class="fas fa-trash"></i></button>` : ''}
+                        <div class="match-row">
+                            <div class="team-box">
+                                ${f.l1 ? `<img src="${f.l1}" class="team-logo">` : `<div style="width:52px;height:52px;background:#1a2030;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">${f.t1.substring(0,3)}</div>`}
+                                <span class="team-name">${f.t1}</span>
+                            </div>
+                            <div class="badge">${f.v}</div>
+                            <div class="team-box">
+                                ${f.l2 ? `<img src="${f.l2}" class="team-logo">` : `<div style="width:52px;height:52px;background:#1a2030;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">${f.t2.substring(0,3)}</div>`}
+                                <span class="team-name">${f.t2}</span>
+                            </div>
+                        </div>
+                    </div>`;
+                });
+            }
+            document.getElementById('fixDisplay').innerHTML = fixHtml || '<div class="empty-state"><i class="fas fa-calendar"></i><p>No fixtures yet</p></div>';
+        } catch(e) {}
+
+        // ── TEAMS LIST ──
+        try {
+            const teamsData = await (await fetch(`${DB_URL}teams.json`)).json();
+            let teamsHtml = '';
+            let teamsLbHtml = '';
+
+            if(teamsData) {
+                const teamArr = Object.entries(teamsData).sort((a,b) => (b[1].pts||0) - (a[1].pts||0));
+                teamArr.forEach(([id, t], i) => {
+                    const mp = (t.w||0) + (t.d||0) + (t.l||0);
+                    const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+
+                    teamsHtml += `
+                    <div class="team-list-card">
+                        ${t.logo ? `<img src="${t.logo}" class="team-list-logo">` : `<div style="width:46px;height:46px;background:#1a2030;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.65rem;color:#555;font-weight:700;">${t.name.substring(0,3)}</div>`}
+                        <div class="team-list-info">
+                            <div class="team-list-name">${t.name}</div>
+                            <div class="team-list-stats">${mp} Played · ${t.gf||0} Goals</div>
+                            <div class="team-stat-pills">
+                                <span class="stat-pill pill-w">W ${t.w||0}</span>
+                                <span class="stat-pill pill-d">D ${t.d||0}</span>
+                                <span class="stat-pill pill-l">L ${t.l||0}</span>
+                                <span class="stat-pill pill-pts">${t.pts||0} PTS</span>
+                            </div>
+                        </div>
+                        ${isOwner ? `<button class="del-btn" style="position:static; margin-left:auto;" onclick="delTeam('${id}')"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>`;
+
+                    teamsLbHtml += `
+                    <div class="lb-row">
+                        <span class="lb-rank ${rankClass}">${i+1}</span>
+                        ${t.logo ? `<img src="${t.logo}" class="lb-logo">` : `<div style="width:40px;height:40px;background:#1a2030;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#555;">${t.name.substring(0,3)}</div>`}
+                        <div class="lb-info">
+                            <div class="n">${t.name}</div>
+                            <div class="s">W${t.w||0} D${t.d||0} L${t.l||0} · GF:${t.gf||0}</div>
+                        </div>
+                        <div class="lb-score">${t.pts||0}</div>
+                    </div>`;
+                });
+            }
+
+            document.getElementById('teamsDisplay').innerHTML = teamsHtml || '<div class="empty-state"><i class="fas fa-shield-alt"></i><p>No teams yet</p></div>';
+            document.getElementById('lbTeamsDisplay').innerHTML = teamsLbHtml || '<div class="empty-state"><i class="fas fa-shield-alt"></i><p>No teams data</p></div>';
+        } catch(e) {}
+
+        // ── PLAYERS LEADERBOARD ──
+        try {
+            const playersData = await (await fetch(`${DB_URL}players.json`)).json();
+            let playersHtml = '';
+
+            if(playersData) {
+                const pArr = Object.entries(playersData).sort((a,b) => (b[1].goals||0) - (a[1].goals||0));
+                pArr.forEach(([id, p], i) => {
+                    const rankClass = i === 0 ? 'r1' : i === 1 ? 'r2' : i === 2 ? 'r3' : '';
+                    playersHtml += `
+                    <div class="lb-row">
+                        <span class="lb-rank ${rankClass}">${i+1}</span>
+                        ${p.photo ? `<img src="${p.photo}" class="lb-avatar">` : `<div style="width:40px;height:40px;border-radius:50%;background:#1a2030;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user" style="color:#444;font-size:0.85rem;"></i></div>`}
+                        <div class="lb-info">
+                            <div class="n">${p.name}</div>
+                            <div class="s">${p.team} · ${p.assists||0} Assists · ${p.mvps||0} MVPs</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div class="lb-score">${p.goals||0}</div>
+                            <div style="font-size:0.6rem;color:var(--text-mid);">GOALS</div>
+                        </div>
+                        ${isOwner ? `<button class="del-btn" style="position:static; margin-left:8px;" onclick="delPlayer('${id}')"><i class="fas fa-trash"></i></button>` : ''}
+                    </div>`;
+                });
+            }
+
+            document.getElementById('lbPlayersDisplay').innerHTML = playersHtml || '<div class="empty-state"><i class="fas fa-user"></i><p>No player stats yet</p></div>';
+        } catch(e) {}
+    }
+
+    function clearInputs() {
+        ['t1','t2','valInput','mvpName','mvpTeam'].forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+        tempImgs.l1 = '';
+        tempImgs.l2 = '';
+        tempImgs.mvpPic = '';
+        document.querySelectorAll('.upload-label').forEach(l => {
+            if(!l.querySelector('input[id]')) {
+                l.style.borderColor = '';
+                l.style.color = '';
+            }
+        });
+    }
+</script>
+</body>
+</html>
