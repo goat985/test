@@ -732,7 +732,7 @@ function addStatRow() {
   row.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
     '<span style="font-size:0.68rem;color:var(--p);font-weight:700;">PLAYER '+ statRowCount +'</span>'+
-    '<button onclick="document.getElementById(''+id+'').remove()" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:0.75rem;"><i class="fas fa-times"></i></button>'+
+    '<button onclick="this.closest(\'div[id]\').remove()" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:0.75rem;"><i class=\"fas fa-times\"></i></button>'+
     '</div>'+
     '<select class="isel sr-player" style="margin-bottom:7px;">'+pOpts+'</select>'+
     '<div class="igrid">'+
