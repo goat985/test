@@ -261,9 +261,11 @@ header h1{font-family:'Goldman';color:var(--p);font-size:1.15rem;text-transform:
     <div class="ptitle"><h3><i class="fas fa-trophy" style="margin-right:6px;"></i>Leaderboard</h3></div>
     <div class="lbtabs">
       <button class="lbtab active" onclick="lbTab('p',this)"><i class="fas fa-shoe-prints"></i> Players</button>
+      <button class="lbtab" onclick="lbTab('gk',this)"><i class="fas fa-hands"></i> GK Saves</button>
       <button class="lbtab" onclick="lbTab('t',this)"><i class="fas fa-shield-alt"></i> Teams</button>
     </div>
     <div id="lbP"></div>
+    <div id="lbGK" style="display:none;"></div>
     <div id="lbT" style="display:none;"></div>
   </div>
 
@@ -305,6 +307,12 @@ header h1{font-family:'Goldman';color:var(--p);font-size:1.15rem;text-transform:
           </label>
           <input type="file" id="mvpPicFile" hidden accept="image/*" onchange="processImg(event,'mvpPic')">
         </div>
+        <div id="matchStatsBox" style="display:none;">
+          <div style="height:1px;background:#1a2030;margin:6px 0 12px;"></div>
+          <div class="ctitle" style="margin-bottom:10px;"><i class="fas fa-chart-bar"></i> Match Player Stats</div>
+          <div id="matchStatRows"></div>
+          <button type="button" class="btnm" style="background:rgba(0,212,255,0.07);color:var(--p);border:1px solid rgba(0,212,255,0.2);margin-bottom:9px;" onclick="addStatRow()">+ Add Player Stat</button>
+        </div>
         <button class="btnm" onclick="saveMatch()">PUBLISH TO CLOUD</button>
       </div>
 
@@ -328,9 +336,16 @@ header h1{font-family:'Goldman';color:var(--p);font-size:1.15rem;text-transform:
         <input type="text" id="pName" class="ifield" placeholder="Player Name">
         <label class="ilbl">Team</label>
         <select id="pTeamSel" class="isel"></select>
+        <label class="ilbl">Position</label>
+        <select id="pPos" class="isel">
+          <option value="player">Player</option>
+          <option value="goalkeeper">Goalkeeper</option>
+        </select>
         <div class="igrid">
           <input type="number" id="pGoals" class="ifield" placeholder="Goals +" style="margin:0;">
           <input type="number" id="pAssists" class="ifield" placeholder="Assists +" style="margin:0;">
+          <input type="number" id="pSaves" class="ifield" placeholder="Saves +" style="margin:0;">
+          <input type="number" id="pCS" class="ifield" placeholder="Clean Sheets +" style="margin:0;">
         </div>
         <div style="margin-bottom:9px;"></div>
         <label class="ulbl" id="pPhotoLbl" for="pPhotoFile">
@@ -425,7 +440,7 @@ function startListeners() {
   db.ref('results').on('value',  function(s){ renderResults(s.val()); });
   db.ref('fixtures').on('value', function(s){ renderFixtures(s.val()); });
   db.ref('teams').on('value',    function(s){ TEAMS = s.val()||{}; renderTeams(); renderTeamsLB(); populateSels(); });
-  db.ref('players').on('value',  function(s){ PLAYERS = s.val()||{}; renderPlayersLB(); populateSels(); });
+  db.ref('players').on('value',  function(s){ PLAYERS = s.val()||{}; renderPlayersLB(); renderGKLB(); populateSels(); });
 }
 
 function loadIdentity() {
@@ -567,6 +582,27 @@ function renderTeams() {
   document.getElementById('teamsDisplay').innerHTML = html;
 }
 
+// ── RENDER GK LB ──
+function renderGKLB() {
+  var html = '';
+  var keys = Object.keys(PLAYERS).filter(function(id){ return PLAYERS[id].position === 'goalkeeper'; });
+  if(keys.length) {
+    var sorted = keys.sort(function(a,b){ return (PLAYERS[b].saves||0)-(PLAYERS[a].saves||0); });
+    sorted.forEach(function(id, i) {
+      var p = PLAYERS[id];
+      var rc = i===0?'g':i===1?'s':i===2?'b':'';
+      var av = p.photo ? '<img src="'+p.photo+'" class="lbav">' : '<div class="lbph"><i class="fas fa-hands" style="color:#444;font-size:0.75rem;"></i></div>';
+      html += '<div class="lbrow"><span class="lbrk '+rc+'">'+(i+1)+'</span>'+av+
+        '<div class="lbi"><div class="n">'+(p.name||'')+'</div>'+
+        '<div class="s">'+(p.team||'?')+' · '+(p.cleanSheets||0)+' CS</div></div>'+
+        '<div class="lbval"><div class="num">'+(p.saves||0)+'</div><div class="lbl">SAVES</div></div></div>';
+    });
+  } else {
+    html = '<div class="empty"><i class="fas fa-hands"></i><p>No goalkeeper stats yet</p></div>';
+  }
+  document.getElementById('lbGK').innerHTML = html;
+}
+
 // ── RENDER TEAMS LB ──
 function renderTeamsLB() {
   var html = '';
@@ -666,9 +702,46 @@ function fillPlayer() {
 
 function toggleMvp() {
   var t = document.getElementById('postType').value;
-  document.getElementById('mvpBox').style.display = t==='result' ? 'block' : 'none';
-  document.getElementById('vlbl').textContent = t==='result' ? 'Score (e.g. 3 - 1)' : 'Match Time / Date';
-  document.getElementById('vinput').placeholder = t==='result' ? 'e.g. 3 - 1' : 'e.g. Sat 20:00';
+  var isRes = t==='result';
+  document.getElementById('mvpBox').style.display = isRes ? 'block' : 'none';
+  document.getElementById('matchStatsBox').style.display = isRes ? 'block' : 'none';
+  document.getElementById('vlbl').textContent = isRes ? 'Score (e.g. 3 - 1)' : 'Match Time / Date';
+  document.getElementById('vinput').placeholder = isRes ? 'e.g. 3 - 1' : 'e.g. Sat 20:00';
+  if(isRes) buildStatRows();
+}
+
+var statRowCount = 0;
+function buildStatRows() {
+  var t1id = document.getElementById('t1s').value;
+  var t2id = document.getElementById('t2s').value;
+  var container = document.getElementById('matchStatRows');
+  if(!container.children.length) {
+    statRowCount = 0;
+    container.innerHTML = '';
+  }
+}
+
+function addStatRow() {
+  var container = document.getElementById('matchStatRows');
+  var id = 'sr_' + (++statRowCount);
+  var pOpts = '<option value="">-- Player --</option>';
+  Object.keys(PLAYERS).forEach(function(pid){ pOpts += '<option value="'+pid+'">'+PLAYERS[pid].name+'</option>'; });
+  var row = document.createElement('div');
+  row.id = id;
+  row.style.cssText = 'background:#080c12;border:1px solid #1a2030;border-radius:11px;padding:11px;margin-bottom:9px;';
+  row.innerHTML =
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">'+
+    '<span style="font-size:0.68rem;color:var(--p);font-weight:700;">PLAYER '+ statRowCount +'</span>'+
+    '<button onclick="document.getElementById(''+id+'').remove()" style="background:none;border:none;color:#ff4444;cursor:pointer;font-size:0.75rem;"><i class="fas fa-times"></i></button>'+
+    '</div>'+
+    '<select class="isel sr-player" style="margin-bottom:7px;">'+pOpts+'</select>'+
+    '<div class="igrid">'+
+    '<input type="number" class="ifield sr-goals" placeholder="Goals" style="margin:0;">'+
+    '<input type="number" class="ifield sr-assists" placeholder="Assists" style="margin:0;">'+
+    '<input type="number" class="ifield sr-saves" placeholder="Saves" style="margin:0;">'+
+    '<input type="number" class="ifield sr-cs" placeholder="Clean Sh." style="margin:0;">'+
+    '</div>';
+  container.appendChild(row);
 }
 
 // ── SAVE MATCH ──
@@ -700,6 +773,27 @@ function saveMatch() {
   var folder = type === 'result' ? 'results' : 'fixtures';
   db.ref(folder).push(item, function(err){
     if(err) { toast('Error: '+err.message, 'err'); return; }
+    // Save per-player match stats
+    if(type === 'result') {
+      var rows = document.querySelectorAll('#matchStatRows > div');
+      rows.forEach(function(row){
+        var pid = row.querySelector('.sr-player').value;
+        if(!pid || !PLAYERS[pid]) return;
+        var g  = parseInt(row.querySelector('.sr-goals').value)   || 0;
+        var a  = parseInt(row.querySelector('.sr-assists').value)  || 0;
+        var sv = parseInt(row.querySelector('.sr-saves').value)    || 0;
+        var cs = parseInt(row.querySelector('.sr-cs').value)       || 0;
+        var p  = PLAYERS[pid];
+        db.ref('players/'+pid).update({
+          goals:   (p.goals||0)+g,
+          assists: (p.assists||0)+a,
+          saves:   (p.saves||0)+sv,
+          cleanSheets: (p.cleanSheets||0)+cs
+        });
+      });
+      document.getElementById('matchStatRows').innerHTML = '';
+      statRowCount = 0;
+    }
     document.getElementById('vinput').value = '';
     IMGS.mvpPic = '';
     resetUlbl('mvpPicLbl','mvpPicPrev');
@@ -739,12 +833,18 @@ function savePlayer() {
 
   var teamName = (tid && TEAMS[tid]) ? TEAMS[tid].name : '';
 
+  var pos    = document.getElementById('pPos').value;
+  var saves  = parseInt(document.getElementById('pSaves').value)  || 0;
+  var cs     = parseInt(document.getElementById('pCS').value)     || 0;
+
   if(eid && PLAYERS[eid]) {
     var p = PLAYERS[eid];
     db.ref('players/'+eid).update({
-      name: name, team: teamName,
-      goals: (p.goals||0)+goals,
-      assists: (p.assists||0)+assists,
+      name: name, team: teamName, position: pos,
+      goals:       (p.goals||0)+goals,
+      assists:     (p.assists||0)+assists,
+      saves:       (p.saves||0)+saves,
+      cleanSheets: (p.cleanSheets||0)+cs,
       photo: IMGS.pPhoto || p.photo || ''
     }, function(err){
       if(err) { toast('Error: '+err.message, 'err'); return; }
@@ -753,7 +853,8 @@ function savePlayer() {
     });
   } else {
     db.ref('players').push({
-      name:name, team:teamName, goals:goals, assists:assists,
+      name:name, team:teamName, position:pos,
+      goals:goals, assists:assists, saves:saves, cleanSheets:cs,
       mvps:0, photo:IMGS.pPhoto||'', time:Date.now()
     }, function(err){
       if(err) { toast('Error: '+err.message, 'err'); return; }
@@ -764,7 +865,7 @@ function savePlayer() {
 }
 
 function clearPlayerForm() {
-  ['pName','pGoals','pAssists'].forEach(function(id){ document.getElementById(id).value=''; });
+  ['pName','pGoals','pAssists','pSaves','pCS'].forEach(function(id){ document.getElementById(id).value=''; });
   document.getElementById('pSel').value = '';
   IMGS.pPhoto = '';
   resetUlbl('pPhotoLbl','pPhotoPrev');
@@ -974,8 +1075,9 @@ function goPage(id, el) {
 function lbTab(tab, el) {
   document.querySelectorAll('.lbtab').forEach(function(t){ t.classList.remove('active'); });
   el.classList.add('active');
-  document.getElementById('lbP').style.display = tab==='p' ? 'block' : 'none';
-  document.getElementById('lbT').style.display = tab==='t' ? 'block' : 'none';
+  document.getElementById('lbP').style.display  = tab==='p'  ? 'block' : 'none';
+  document.getElementById('lbGK').style.display = tab==='gk' ? 'block' : 'none';
+  document.getElementById('lbT').style.display  = tab==='t'  ? 'block' : 'none';
 }
 
 // ── TOAST ──
